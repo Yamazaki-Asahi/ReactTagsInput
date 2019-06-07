@@ -4,10 +4,10 @@ class TagsInput extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            selectedTags: [],
-            allTags: ['トップス', 'ボトムス', '靴', 'バッグ', '上着', '夏服', '冬服', 'かっこいい', 'かわいい', '綺麗'],
-            newTag: '',
-            suggestions: [],
+            registeredTags: [], //その記事に登録されているタグの配列
+            allTags: ['JavaScript', 'React', 'JS', 'Vue.js', 'PHP', 'HTML', 'CSS', 'Python', 'Laravel', 'CakePHP', 'Ruby', 'Ruby on Rails', 'WordPress'], //すでに別の記事で使用されているタグの配列
+            suggestions: [], //入力中の文字の中からタグの候補をautoCompleteで出力するための配列
+            newTag: '', //入力中の文字列
         }
     }
 
@@ -16,7 +16,7 @@ class TagsInput extends React.Component {
         const tmpSuggestions = [];
         this.state.allTags.forEach(function (val) {
             // もしそのタグの文字列に入力中の文字が含まれていたら候補に入れる
-            if (val.indexOf(newVal) !== -1) {
+            if (val.toLowerCase().indexOf(newVal.toLowerCase()) !== -1) {
                 tmpSuggestions.push(val);
             }
         }, this);
@@ -27,15 +27,20 @@ class TagsInput extends React.Component {
     }
 
     handleKeyDown(e) {
+        // タブキーが押されたら
         if (e.key === 'Tab' && e.keyCode !== 229) {
-            const array_copy = this.state.selectedTags.slice();
-            array_copy.push(this.state.newTag);
+            e.preventDefault();
+            let tmpRegisteredTags = this.state.registeredTags.slice();
+            tmpRegisteredTags.push(this.state.newTag);
 
+            //入力中の文字列が空ではなかったら
             if(this.state.newTag != '') {
-                if(this.state.selectedTags.indexOf(this.state.newTag)) {
+                //そのタグがすでに選択されていなかったら新しく登録する
+                if(this.state.registeredTags.indexOf(this.state.newTag) === -1) {
                     this.setState({
-                        selectedTags: array_copy,
-                        newTag: ''
+                        registeredTags: tmpRegisteredTags,
+                        newTag: '',
+                        suggestions: []
                     });
                 } else {
                     alert('そのタグはすでに選択されています！')
@@ -44,31 +49,42 @@ class TagsInput extends React.Component {
         }
     }
 
+    handleDelete(val) {
+        console.log('aaa');
+        let tmpRegisteredTags = this.state.registeredTags.slice();
+        const index = tmpRegisteredTags.indexOf(val);
+        tmpRegisteredTags.splice(index, 1);
+        // console.log(index, tmpRegisteredTags);
+        this.setState({
+            registeredTags: tmpRegisteredTags
+        });
+    }
+
     render() {
+        const registeredTagsListHtml = [];
+        const suggestionsListHtml = [];
+
+        this.state.suggestions.forEach((val) => {
+            suggestionsListHtml.push(<option value={val} />);
+        }, this)
+
+        this.state.registeredTags.forEach((val) => {
+            registeredTagsListHtml.push(<li>{val} <a href="javascript:void(0)" onClick={() => {this.handleDelete(val)}}>×</a></li>);
+        }, this);
+
         return <div>
+
             <input type="text" name="tag"
                    value={this.state.newTag}
-                   onChange={this.handleChange.bind(this)}
-                   onKeyDown={this.handleKeyDown.bind(this)}
+                   placeholder="Tabキーで登録"
+                   onChange={(e) => {this.handleChange(e)}}
+                   onKeyDown={(e) => {this.handleKeyDown(e)}}
                    autoComplete="on"
                    list="suggestions" />
             {/*suggestions配列の中身をループ表示*/}
-            <datalist id="suggestions">
-                {
-                    this.state.suggestions.map((data) => {
-                        return <option value={data} />;
-                    })
-                }
-            </datalist>
-
+            <datalist id="suggestions">{suggestionsListHtml}</datalist>
             {/*登録されたタグを一覧で表示*/}
-            <ul className="selected-tag-list">
-                {
-                    this.state.selectedTags.map((data) => {
-                        return <li>{data}</li>;
-                     })
-                }
-            </ul>
+            <ul className="selected-tag-list">{registeredTagsListHtml}</ul>
         </div>
     }
 }

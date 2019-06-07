@@ -8,6 +8,7 @@ function App() {
         <div className="App">
             <header className="App-header">
                 <img src={logo} className="App-logo" alt="logo"/>
+                <h1>タグを入力</h1>
                 <TagsInput />
             </header>
         </div>
