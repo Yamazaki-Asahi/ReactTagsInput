@@ -1,14 +1,17 @@
 import React from 'react';
+import SuggestionList from './SuggestionList';
+import TagList from './TagList';
 
 class TagsInput extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             registeredTags: [], //その記事に登録されているタグの配列
-            allTags: ['JavaScript', 'React', 'JS', 'Vue.js', 'PHP', 'HTML', 'CSS', 'Python', 'Laravel', 'CakePHP', 'Ruby', 'Ruby on Rails', 'WordPress'], //すでに別の記事で使用されているタグの配列
+            allTags: ['JavaScript', 'React.js', 'JS', 'Vue.js', 'PHP', 'HTML', 'CSS', 'Python', 'Laravel', 'CakePHP', 'Ruby', 'Ruby on Rails', 'WordPress'], //すでに別の記事で使用されているタグの配列
             suggestions: [], //入力中の文字の中からタグの候補をautoCompleteで出力するための配列
             newTag: '', //入力中の文字列
         }
+        this.handleDelete = this.handleDelete.bind(this);
     }
 
     handleChange(e) {
@@ -50,30 +53,16 @@ class TagsInput extends React.Component {
     }
 
     handleDelete(val) {
-        console.log('aaa');
         let tmpRegisteredTags = this.state.registeredTags.slice();
         const index = tmpRegisteredTags.indexOf(val);
         tmpRegisteredTags.splice(index, 1);
-        // console.log(index, tmpRegisteredTags);
         this.setState({
             registeredTags: tmpRegisteredTags
         });
     }
 
     render() {
-        const registeredTagsListHtml = [];
-        const suggestionsListHtml = [];
-
-        this.state.suggestions.forEach((val) => {
-            suggestionsListHtml.push(<option value={val} />);
-        }, this)
-
-        this.state.registeredTags.forEach((val) => {
-            registeredTagsListHtml.push(<li>{val} <a href="javascript:void(0)" onClick={() => {this.handleDelete(val)}}>×</a></li>);
-        }, this);
-
         return <div>
-
             <input type="text" name="tag"
                    value={this.state.newTag}
                    placeholder="Tabキーで登録"
@@ -81,10 +70,9 @@ class TagsInput extends React.Component {
                    onKeyDown={(e) => {this.handleKeyDown(e)}}
                    autoComplete="on"
                    list="suggestions" />
-            {/*suggestions配列の中身をループ表示*/}
-            <datalist id="suggestions">{suggestionsListHtml}</datalist>
-            {/*登録されたタグを一覧で表示*/}
-            <ul className="selected-tag-list">{registeredTagsListHtml}</ul>
+            <SuggestionList suggestions={this.state.suggestions} />
+            <TagList registeredTags={this.state.registeredTags}
+                     handleDelete={this.handleDelete} />
         </div>
     }
 }
